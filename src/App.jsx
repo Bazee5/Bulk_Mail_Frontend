@@ -30,32 +30,27 @@ function App() {
     reader.readAsBinaryString(file);
   }
 
-  function send() {
-    setStatus(true);
-    // In your actual implementation, use axios here:
-    axios.post("https://bulkmail-3nbj.onrender.com/sendmail", {
-      msg: msg,
-      emailList: emailList,
-    })
-    .then((data) => {
-      if (data.data === true) {
-        showToast("Emails sent successfully", "success");
-        setStatus(false);
-      } else {
-        showToast("Failed to send emails", "error");
-      }
-    })
-    .catch((err) => {
-      showToast("Server error. Please try again", "error");
-      setStatus(false);
-    });
-    
-    // Demo simulation
-    setTimeout(() => {
+ function send() {
+  setStatus(true);
+
+  axios.post(`${import.meta.env.VITE_BACKEND_URL}/sendemail`, {
+    msg: msg,
+    emailList: emailList,
+  })
+  .then((data) => {
+    if (data.data === true) {
       showToast("Emails sent successfully", "success");
       setStatus(false);
-    }, 2000);
-  }
+    } else {
+      showToast("Failed to send emails", "error");
+    }
+  })
+  .catch((err) => {
+    showToast("Server error. Please try again", "error");
+    setStatus(false);
+  });
+}
+
 
   const showToast = (message, type) => {
     // Simple toast implementation using state
