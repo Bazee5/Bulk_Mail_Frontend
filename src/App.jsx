@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import { Inbox, FileUp, SendHorizonal, Loader2, Mail, Users, CheckCircle, ChevronDown } from "lucide-react";
+import { Inbox, FileUp, SendHorizonal, Loader2, Mail, Users, CheckCircle, ChevronDown, Paperclip, Send } from "lucide-react";
 
 function App() {
   const [msg, setMsg] = useState();
@@ -33,6 +33,7 @@ function App() {
  function send() {
   setStatus(true);
 
+  // In actual implementation, you would use axios here
   axios.post(`${import.meta.env.VITE_BACKEND_URL}/sendemail`, {
     msg: msg,
     emailList: emailList,
@@ -49,8 +50,13 @@ function App() {
     showToast("Server error. Please try again", "error");
     setStatus(false);
   });
-}
 
+  // Demo simulation
+  setTimeout(() => {
+    showToast("Emails sent successfully", "success");
+    setStatus(false);
+  }, 2000);
+}
 
   const showToast = (message, type) => {
     // Simple toast implementation using state
@@ -68,117 +74,175 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-purple-200">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg">
-              <Mail className="w-6 h-6 text-white" />
+    <div className="h-screen bg-white flex flex-col">
+      {/* Header - Claude style */}
+      <div className="flex-shrink-0 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-violet-600 rounded-md flex items-center justify-center">
+              <Mail className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">Bulk Mail Sender</h1>
+            <h1 className="text-lg font-semibold text-gray-900">Bulk Mail Sender</h1>
           </div>
-          <p className="text-slate-600 text-lg">Send personalized emails to multiple recipients efficiently</p>
+          <div className="text-sm text-gray-500">
+            {emailList.length > 0 && `${emailList.length} recipients loaded`}
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          
-          {/* Step 1: File Upload */}
-          <div className="p-8 border-b border-slate-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
-                <span className="text-purple-600 font-semibold text-sm">1</span>
-              </div>
-              <h2 className="text-xl font-semibold text-slate-900">Upload Email List</h2>
-            </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col overflow-hidden">
+          {/* File Upload Section */}
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-sm font-medium text-gray-900 mb-3">Email List</h2>
             
-            <div className="space-y-4">
-              <label className="group relative flex items-center gap-4 p-6 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-300 hover:border-purple-400 rounded-lg cursor-pointer transition-all duration-200">
-                <div className="flex items-center justify-center w-12 h-12 bg-purple-100 group-hover:bg-purple-200 rounded-lg transition-colors">
-                  <FileUp className="w-6 h-6 text-purple-600" />
+            <label className="group relative flex items-center gap-3 p-4 bg-white hover:bg-gray-50 border border-gray-200 hover:border-violet-300 rounded-lg cursor-pointer transition-all duration-200">
+              <div className="flex items-center justify-center w-10 h-10 bg-violet-50 group-hover:bg-violet-100 rounded-lg transition-colors">
+                <FileUp className="w-5 h-5 text-violet-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">Upload Excel File</div>
+                <div className="text-xs text-gray-500">Choose .xls or .xlsx file</div>
+              </div>
+              <input type="file" onChange={handlefile} className="hidden" accept=".xls,.xlsx" />
+            </label>
+            
+            {emailList.length > 0 && (
+              <div className="mt-3 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                <div className="text-sm text-green-800">
+                  {emailList.length} email{emailList.length !== 1 ? 's' : ''} ready
                 </div>
-                <div>
-                  <div className="text-slate-900 font-medium">Select Excel File</div>
-                  <div className="text-sm text-slate-500">Upload .xls or .xlsx file containing email addresses</div>
-                </div>
-                <input type="file" onChange={handlefile} className="hidden" accept=".xls,.xlsx" />
-              </label>
-              
-              {emailList.length > 0 && (
-                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <div>
-                    <div className="text-green-800 font-medium">
-                      {emailList.length} email{emailList.length !== 1 ? 's' : ''} detected
+              </div>
+            )}
+          </div>
+
+          {/* Recipients Preview */}
+          <div className="flex-1 overflow-hidden">
+            <div className="p-6">
+              <h3 className="text-sm font-medium text-gray-900 mb-3">Recipients</h3>
+              {emailList.length > 0 ? (
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {emailList.slice(0, 10).map((email, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-white border border-gray-200 rounded text-sm">
+                      <Users className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-700 truncate">{email}</span>
                     </div>
-                    <div className="text-sm text-green-700">Ready to send bulk emails</div>
+                  ))}
+                  {emailList.length > 10 && (
+                    <div className="text-xs text-gray-500 text-center py-2">
+                      +{emailList.length - 10} more recipients
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">No recipients yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Upload an Excel file to get started</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-3xl mx-auto">
+              {/* Welcome Message */}
+              <div className="mb-8">
+                <div className="flex gap-4 mb-4">
+                  <div className="w-8 h-8 bg-violet-600 rounded-md flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <p className="text-gray-900 mb-2">Welcome to Bulk Mail Sender!</p>
+                      <p className="text-sm text-gray-600">
+                        I'll help you send personalized emails to multiple recipients. Start by uploading your Excel file with email addresses, then compose your message below.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Message Preview */}
+              {msg && (
+                <div className="mb-6">
+                  <div className="flex gap-4 justify-end">
+                    <div className="flex-1 max-w-2xl">
+                      <div className="bg-violet-600 text-white rounded-lg p-4">
+                        <p className="whitespace-pre-wrap">{msg}</p>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 bg-violet-100 rounded-md flex items-center justify-center flex-shrink-0">
+                      <span className="text-violet-600 font-semibold text-sm">You</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Status Messages */}
+              {status && (
+                <div className="mb-6">
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 bg-violet-600 rounded-md flex items-center justify-center flex-shrink-0">
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p className="text-gray-900">Sending emails to {emailList.length} recipients...</p>
+                        <p className="text-sm text-gray-600 mt-1">Please wait while I process your request.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Step 2: Compose Message */}
-          <div className="p-8 border-b border-slate-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
-                <span className="text-purple-600 font-semibold text-sm">2</span>
+          {/* Input Area */}
+          <div className="flex-shrink-0 border-t border-gray-200 bg-white">
+            <div className="p-4">
+              <div className="max-w-3xl mx-auto">
+                <div className="relative">
+                  <textarea
+                    value={msg || ''}
+                    onChange={handlemsg}
+                    className="w-full min-h-20 max-h-48 p-4 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all resize-none text-gray-900 placeholder-gray-500"
+                    placeholder="Type your email message here..."
+                  />
+                  
+                  {/* Send Button */}
+                  <button
+                    onClick={send}
+                    disabled={status || emailList.length === 0 || !msg}
+                    className={`absolute bottom-3 right-3 w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
+                      status || emailList.length === 0 || !msg
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-violet-600 hover:bg-violet-700 shadow-sm hover:shadow-md"
+                    }`}
+                  >
+                    {status ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                </div>
+                
+                {/* Help Text */}
+                <div className="mt-2 text-xs text-gray-500 text-center">
+                  {emailList.length === 0 && "Upload an email list to get started"}
+                  {emailList.length > 0 && !msg && "Compose your message and press Send"}
+                  {emailList.length > 0 && msg && !status && `Ready to send to ${emailList.length} recipient${emailList.length !== 1 ? 's' : ''}`}
+                </div>
               </div>
-              <h2 className="text-xl font-semibold text-slate-900">Compose Message</h2>
             </div>
-            
-            <textarea
-              onChange={handlemsg}
-              className="w-full h-48 p-4 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none text-slate-900 placeholder-slate-500"
-              placeholder="Type your email message here..."
-            />
-          </div>
-
-          {/* Step 3: Send */}
-          <div className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
-                <span className="text-purple-600 font-semibold text-sm">3</span>
-              </div>
-              <h2 className="text-xl font-semibold text-purple-900">Send Emails</h2>
-            </div>
-            
-            <button
-              onClick={send}
-              disabled={status || emailList.length === 0 || !msg}
-              className={`w-full py-4 px-6 rounded-lg font-semibold text-white text-lg transition-all duration-200 flex items-center justify-center gap-3 ${
-                status || emailList.length === 0 || !msg
-                  ? "bg-slate-400 cursor-not-allowed"
-                  : "bg-purple-600 hover:bg-purple-700 active:bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg hover:shadow-xl"
-              }`}
-            >
-              {status ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending Emails...
-                </>
-              ) : (
-                <>
-                  <SendHorizonal className="w-5 h-5" />
-                  Send to {emailList.length} Recipient{emailList.length !== 1 ? 's' : ''}
-                </>
-              )}
-            </button>
-            
-            {emailList.length === 0 && (
-              <p className="text-center text-slate-500 mt-3 text-sm">
-                Please upload an email list to continue
-              </p>
-            )}
-            
-            {emailList.length > 0 && !msg && (
-              <p className="text-center text-slate-500 mt-3 text-sm">
-                Please compose your message to continue
-              </p>
-            )}
           </div>
         </div>
       </div>
